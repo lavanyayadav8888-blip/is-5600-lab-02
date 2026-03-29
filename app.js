@@ -97,3 +97,6 @@ document.getElementById("btnDelete").addEventListener("click", (e) => {
 
   loadUsers();
 });
+window.addEventListener("DOMContentLoaded", () => {
+  loadUsers();
+});
