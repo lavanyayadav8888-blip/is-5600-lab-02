@@ -55,3 +55,14 @@ function loadPortfolio(user) {
     portfolioList.appendChild(btn);
   });
 }
+function showStockDetails(symbol) {
+  const stock = stocks.find(s => s.symbol === symbol);
+
+  if (!stock) return;
+
+  document.getElementById("stockName").textContent = stock.name;
+  document.getElementById("stockSector").textContent = stock.sector;
+  document.getElementById("stockIndustry").textContent = stock.industry;
+  document.getElementById("stockAddress").textContent = stock.address;
+  document.getElementById("logo").src = stock.logo;
+}
