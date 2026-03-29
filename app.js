@@ -66,3 +66,16 @@ function showStockDetails(symbol) {
   document.getElementById("stockAddress").textContent = stock.address;
   document.getElementById("logo").src = stock.logo;
 }
+document.getElementById("btnSave").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  if (!selectedUser) return;
+
+  selectedUser.firstname = document.getElementById("firstname").value;
+  selectedUser.lastname = document.getElementById("lastname").value;
+  selectedUser.address = document.getElementById("address").value;
+  selectedUser.city = document.getElementById("city").value;
+  selectedUser.email = document.getElementById("email").value;
+
+  loadUsers(); // refresh list
+});
