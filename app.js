@@ -79,3 +79,21 @@ document.getElementById("btnSave").addEventListener("click", (e) => {
 
   loadUsers(); // refresh list
 });
+document.getElementById("btnDelete").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  if (!selectedUser) return;
+
+  const index = users.findIndex(u => u.id === selectedUser.id);
+
+  if (index !== -1) {
+    users.splice(index, 1);
+  }
+
+  selectedUser = null;
+
+  document.querySelector(".userEntry").reset();
+  portfolioList.innerHTML = "";
+
+  loadUsers();
+});
