@@ -13,3 +13,19 @@ function loadUsers() {
     userList.appendChild(li);
   });
 }
+let selectedUser = null;
+
+function selectUser(user) {
+  selectedUser = user;
+
+  // Fill form
+  document.getElementById("userID").value = user.id;
+  document.getElementById("firstname").value = user.firstname;
+  document.getElementById("lastname").value = user.lastname;
+  document.getElementById("address").value = user.address;
+  document.getElementById("city").value = user.city;
+  document.getElementById("email").value = user.email;
+
+  loadPortfolio(user);
+}
+
