@@ -28,4 +28,30 @@ function selectUser(user) {
 
   loadPortfolio(user);
 }
+const portfolioList = document.querySelector(".portfolio-list");
 
+function loadPortfolio(user) {
+  // clear old (keep headers)
+  portfolioList.innerHTML = `
+    <h3>Symbol</h3>
+    <h3># Shares</h3>
+    <h3>Actions</h3>
+  `;
+
+  user.portfolio.forEach(stock => {
+    const symbol = document.createElement("div");
+    symbol.textContent = stock.symbol;
+
+    const shares = document.createElement("div");
+    shares.textContent = stock.shares;
+
+    const btn = document.createElement("button");
+    btn.textContent = "View";
+
+    btn.addEventListener("click", () => showStockDetails(stock.symbol));
+
+    portfolioList.appendChild(symbol);
+    portfolioList.appendChild(shares);
+    portfolioList.appendChild(btn);
+  });
+}
