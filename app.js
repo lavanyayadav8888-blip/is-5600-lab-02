@@ -1,102 +1,147 @@
 /* add your code here */
-const userList = document.querySelector(".user-list");
+document.addEventListener('DOMContentLoaded', () => {
+  const stocksData = JSON.parse(stockContent);
+  const userData = JSON.parse(userContent);
 
-function loadUsers() {
-  userList.innerHTML = "";
+  const saveButton = document.querySelector('#btnSave');
+  const deleteButton = document.querySelector('#btnDelete');
 
-  users.forEach(user => {
-    const li = document.createElement("li");
-    li.textContent = `${user.firstname} ${user.lastname}`;
-    
-    li.addEventListener("click", () => selectUser(user));
-    
+  // Initial render
+  generateUserList(userData, stocksData);
+
+  // DELETE USER
+  deleteButton.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    const userId = document.querySelector('#userID').value;
+    const index = userData.findIndex(u => u.id == userId);
+
+    if (index !== -1) {
+      userData.splice(index, 1);
+      generateUserList(userData, stocksData);
+
+      // Clear UI after delete
+      document.querySelector('.portfolio-list').innerHTML = '';
+      document.querySelector('.userEntry').reset();
+    }
+  });
+
+  // SAVE USER
+  saveButton.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    const id = document.querySelector('#userID').value;
+
+    for (let i = 0; i < userData.length; i++) {
+      if (userData[i].id == id) {
+        userData[i].user.firstname = document.querySelector('#firstname').value;
+        userData[i].user.lastname = document.querySelector('#lastname').value;
+        userData[i].user.address = document.querySelector('#address').value;
+        userData[i].user.city = document.querySelector('#city').value;
+        userData[i].user.email = document.querySelector('#email').value;
+
+        generateUserList(userData, stocksData);
+        break;
+      }
+    }
+  });
+});
+
+
+/**
+ * Render user list
+ */
+function generateUserList(users, stocks) {
+  const userList = document.querySelector('.user-list');
+
+  userList.innerHTML = '';
+
+  users.forEach(({ user, id }) => {
+    const li = document.createElement('li');
+    li.innerText = `${user.lastname}, ${user.firstname}`;
+    li.setAttribute('id', id);
     userList.appendChild(li);
   });
+
+  userList.onclick = (event) => handleUserListClick(event, users, stocks);
 }
-let selectedUser = null;
 
-function selectUser(user) {
-  selectedUser = user;
 
-  // Fill form
-  document.getElementById("userID").value = user.id;
-  document.getElementById("firstname").value = user.firstname;
-  document.getElementById("lastname").value = user.lastname;
-  document.getElementById("address").value = user.address;
-  document.getElementById("city").value = user.city;
-  document.getElementById("email").value = user.email;
+/**
+ * Handle user click
+ */
+function handleUserListClick(event, users, stocks) {
+  const userId = event.target.id;
+  if (!userId) return;
 
-  loadPortfolio(user);
+  const user = users.find(u => u.id == userId);
+
+  populateForm(user);
+  renderPortfolio(user, stocks);
 }
-const portfolioList = document.querySelector(".portfolio-list");
 
-function loadPortfolio(user) {
-  // clear old (keep headers)
-  portfolioList.innerHTML = `
+
+/**
+ * Populate form
+ */
+function populateForm(data) {
+  const { user, id } = data;
+
+  document.querySelector('#userID').value = id;
+  document.querySelector('#firstname').value = user.firstname;
+  document.querySelector('#lastname').value = user.lastname;
+  document.querySelector('#address').value = user.address;
+  document.querySelector('#city').value = user.city;
+  document.querySelector('#email').value = user.email;
+}
+
+
+/**
+ * Render portfolio
+ */
+function renderPortfolio(user, stocks) {
+  const container = document.querySelector('.portfolio-list');
+
+  // Keep headers
+  container.innerHTML = `
     <h3>Symbol</h3>
     <h3># Shares</h3>
     <h3>Actions</h3>
   `;
 
-  user.portfolio.forEach(stock => {
-    const symbol = document.createElement("div");
-    symbol.textContent = stock.symbol;
+  user.portfolio.forEach(({ symbol, owned }) => {
+    const symbolEl = document.createElement('p');
+    const sharesEl = document.createElement('p');
+    const btn = document.createElement('button');
 
-    const shares = document.createElement("div");
-    shares.textContent = stock.shares;
+    symbolEl.innerText = symbol;
+    sharesEl.innerText = owned;
+    btn.innerText = 'View';
+    btn.id = symbol;
 
-    const btn = document.createElement("button");
-    btn.textContent = "View";
-
-    btn.addEventListener("click", () => showStockDetails(stock.symbol));
-
-    portfolioList.appendChild(symbol);
-    portfolioList.appendChild(shares);
-    portfolioList.appendChild(btn);
+    container.append(symbolEl, sharesEl, btn);
   });
-}
-function showStockDetails(symbol) {
-  const stock = stocks.find(s => s.symbol === symbol);
 
+  // Event delegation for buttons
+  container.onclick = (event) => {
+    if (event.target.tagName === 'BUTTON') {
+      viewStock(event.target.id, stocks);
+    }
+  };
+}
+
+
+/**
+ * View stock details
+ */
+function viewStock(symbol, stocks) {
+  const stock = stocks.find(s => s.symbol == symbol);
   if (!stock) return;
 
-  document.getElementById("stockName").textContent = stock.name;
-  document.getElementById("stockSector").textContent = stock.sector;
-  document.getElementById("stockIndustry").textContent = stock.industry;
-  document.getElementById("stockAddress").textContent = stock.address;
-  document.getElementById("logo").src = stock.logo;
+  document.querySelector('#stockName').textContent = stock.name;
+  document.querySelector('#stockSector').textContent = stock.sector;
+  document.querySelector('#stockIndustry').textContent = stock.subIndustry;
+  document.querySelector('#stockAddress').textContent = stock.address;
+
+  document.querySelector('#logo').src = `logos/${symbol}.svg`;
 }
-document.getElementById("btnSave").addEventListener("click", (e) => {
-  e.preventDefault();
-
-  if (!selectedUser) return;
-
-  selectedUser.firstname = document.getElementById("firstname").value;
-  selectedUser.lastname = document.getElementById("lastname").value;
-  selectedUser.address = document.getElementById("address").value;
-  selectedUser.city = document.getElementById("city").value;
-  selectedUser.email = document.getElementById("email").value;
-
-  loadUsers(); // refresh list
-});
-document.getElementById("btnDelete").addEventListener("click", (e) => {
-  e.preventDefault();
-
-  if (!selectedUser) return;
-
-  const index = users.findIndex(u => u.id === selectedUser.id);
-
-  if (index !== -1) {
-    users.splice(index, 1);
-  }
-
-  selectedUser = null;
-
-  document.querySelector(".userEntry").reset();
-  portfolioList.innerHTML = "";
-
-  loadUsers();
-});
-window.addEventListener("DOMContentLoaded", () => {
-  loadUsers();
-});
